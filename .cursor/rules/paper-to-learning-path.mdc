@@ -1,0 +1,19 @@
+---
+description: Convert research papers (PDF) into translated HTML and generate prerequisite learning paths
+globs: ["*.pdf", "**/*.pdf", "papers/*"]
+alwaysApply: false
+---
+
+# Paper to Learning Path & HTML Translator
+
+When the user asks to translate, convert, summarize, or explain a research paper PDF, or asks for a learning roadmap/path for a scientific paper, activate and follow the 8-step workflow in `.agents/skills/paper-to-learning-path/SKILL.md` (or `.claude/skills/paper-to-learning-path/SKILL.md`).
+
+## Quick Workflow Summary:
+1. **Validate Dependencies**: Run `python .agents/skills/paper-to-learning-path/scripts/check_deps.py`
+2. **Extract Content**: Run `python .agents/skills/paper-to-learning-path/scripts/extract_pdf.py --pdf <path> --out-dir output/assets`
+3. **Detect Language**: Run `python .agents/skills/paper-to-learning-path/scripts/detect_lang.py --json output/extracted.json`
+4. **Translate**: Run `python .agents/skills/paper-to-learning-path/scripts/translate_content.py --json output/extracted.json --source <src> --target <tgt> --out output/translated.json` (Never translate LaTeX math formulas inside `$…$` or `math_block`)
+5. **Render Paper HTML**: Run `python .agents/skills/paper-to-learning-path/scripts/render_html.py --json output/translated.json --out output/paper.html`
+6. **Analyze Paper**: Run `python .agents/skills/paper-to-learning-path/scripts/analyze_paper.py --json output/translated.json --out output/analysis.json`
+7. **Scaffold Learning Path**: Run `python .agents/skills/paper-to-learning-path/scripts/generate_learning_path.py --analysis output/analysis.json --paper-html output/paper.html --out-dir output/learning`
+8. **Write Educational Chapters**: Open each chapter HTML in `output/learning/` and replace `<!-- AGENT: ... -->` comments with rich educational prose, math blocks, and intuitive analogies.

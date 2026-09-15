@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="{{TARGET_LANG}}">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Learning Path: {{TITLE}}</title>
+  <meta name="description" content="A complete learning path to understand {{TITLE}} — {{TOTAL_CHAPTERS}} chapters from foundations to paper deep-dive"/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       NATURE-INSPIRED LEARNING PATH INDEX — Design System
+       Palette: moss, sand, stone, lake blue, warm parchment
+       ═══════════════════════════════════════════════════════ */
+    :root {
+      --bg:           #f5f0e8;
+      --surface:      #faf7f2;
+      --surface-2:    #ede8df;
+      --border:       #d4c9b5;
+      --border-dark:  #b8a990;
+      --moss:         #5a7a55;
+      --moss-light:   #7a9e74;
+      --moss-pale:    #d6e8d0;
+      --stone:        #8a7e6e;
+      --lake:         #4a7a8a;
+      --lake-pale:    #d0e3e8;
+      --amber:        #8a6e3a;
+      --amber-pale:   #f0e0c0;
+      --text:         #2d2820;
+      --text-muted:   #6b5e4e;
+      --text-light:   #9a8e7e;
+      --heading:      #3a4e35;
+      --critical:     #c0392b;
+      --important:    #e67e22;
+      --helpful:      #27ae60;
+
+      --r-sm: 6px; --r-md: 12px; --r-lg: 20px; --r-pill: 999px;
+      --sh-sm: 0 2px 8px rgba(90,70,40,.08);
+      --sh-md: 0 4px 20px rgba(90,70,40,.13);
+      --sh-lg: 0 8px 40px rgba(90,70,40,.18);
+      --t: 220ms ease;
+      --nav-h: 60px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Source Serif 4', Georgia, serif;
+      background: var(--bg);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      color: var(--text);
+      line-height: 1.75;
+      min-height: 100vh;
+    }
+
+    /* ── Top Nav ── */
+    .top-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: var(--nav-h);
+      background: rgba(245,240,232,.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: .6rem;
+      font-family: 'Inter', sans-serif; font-weight: 700; font-size: .9rem;
+      color: var(--heading); text-decoration: none;
+    }
+    .brand-icon {
+      width: 30px; height: 30px; border-radius: var(--r-sm);
+      background: var(--moss); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .85rem; font-weight: 800;
+    }
+    .nav-paper-link {
+      font-family: 'Inter', sans-serif; font-size: .8rem; font-weight: 500;
+      color: var(--text-muted); text-decoration: none;
+      padding: .3rem .8rem; border-radius: var(--r-pill);
+      border: 1px solid var(--border);
+      transition: all var(--t);
+    }
+    .nav-paper-link:hover { color: var(--moss); border-color: var(--moss-light); background: var(--moss-pale); }
+
+    /* ── Page wrapper ── */
+    .page { max-width: 760px; margin: 0 auto; padding: calc(var(--nav-h) + 3rem) 1.5rem 6rem; }
+
+    /* ── Hero ── */
+    .hero { text-align: center; padding: 3rem 0 2.5rem; }
+    .hero-label {
+      display: inline-block; padding: .25rem 1rem;
+      font-family: 'Inter', sans-serif; font-size: .7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .12em; color: var(--moss);
+      background: var(--moss-pale); border-radius: var(--r-pill);
+      border: 1px solid rgba(90,122,85,.3); margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-family: 'Inter', sans-serif; font-size: clamp(1.8rem, 4.5vw, 2.8rem);
+      font-weight: 800; color: var(--heading); line-height: 1.15;
+      letter-spacing: -.03em; margin-bottom: 1rem;
+    }
+    .hero .subtitle {
+      font-size: 1rem; color: var(--text-muted); max-width: 560px; margin: 0 auto 1.5rem;
+    }
+    .meta-chips { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; }
+    .chip {
+      font-family: 'Inter', sans-serif; font-size: .75rem; font-weight: 500;
+      padding: .3rem .8rem; border-radius: var(--r-pill);
+      background: var(--surface); border: 1px solid var(--border); color: var(--stone);
+    }
+    .chip.difficulty-advanced { background: var(--amber-pale); border-color: var(--amber); color: var(--amber); }
+    .chip.difficulty-intermediate { background: var(--lake-pale); border-color: var(--lake); color: var(--lake); }
+    .chip.difficulty-beginner { background: var(--moss-pale); border-color: var(--moss); color: var(--moss); }
+
+    /* ── Stats grid ── */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: .75rem; margin: 2rem 0;
+    }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md);
+      padding: 1.25rem; text-align: center;
+      box-shadow: var(--sh-sm); transition: all var(--t);
+    }
+    .stat-card:hover { box-shadow: var(--sh-md); transform: translateY(-1px); }
+    .stat-num {
+      font-family: 'Inter', sans-serif; font-size: 2rem; font-weight: 800;
+      color: var(--heading); line-height: 1;
+    }
+    .stat-label {
+      font-family: 'Inter', sans-serif; font-size: .7rem; font-weight: 500;
+      color: var(--text-light); margin-top: .4rem; text-transform: uppercase; letter-spacing: .06em;
+    }
+
+    /* ── Prereq box ── */
+    .prereq-box {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md);
+      padding: 1.5rem 1.75rem; margin: 2rem 0;
+    }
+    .prereq-box h3 {
+      font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 700;
+      color: var(--heading); margin-bottom: .75rem; display: flex; align-items: center; gap: .5rem;
+    }
+    .prereq-box ul { padding-left: 1.2rem; color: var(--text-muted); font-size: .9rem; }
+    .prereq-box li { margin-bottom: .3rem; }
+
+    /* ── Section headings ── */
+    h2 {
+      font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 700;
+      color: var(--heading); margin: 2.5rem 0 .75rem;
+      padding-bottom: .5rem; border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Roadmap ── */
+    .roadmap { position: relative; margin: 1.5rem 0; }
+    .roadmap::before {
+      content: ''; position: absolute; left: 23px; top: 0; bottom: 0; width: 1px;
+      background: var(--border);
+    }
+    .roadmap-item { position: relative; padding-left: 60px; margin-bottom: 1rem; }
+    .roadmap-dot {
+      position: absolute; left: 12px; top: 22px;
+      width: 24px; height: 24px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Inter', sans-serif; font-size: .65rem; font-weight: 800;
+      background: var(--surface); border: 2px solid var(--border);
+      color: var(--heading); z-index: 2;
+    }
+    .roadmap-dot.dot-critical { border-color: var(--critical); color: var(--critical); }
+    .roadmap-dot.dot-important { border-color: var(--moss); color: var(--moss); }
+    .roadmap-dot.dot-helpful { border-color: var(--stone); color: var(--stone); }
+
+    .roadmap-card {
+      display: block; text-decoration: none;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-md); padding: 1.1rem 3rem 1.1rem 1.25rem;
+      transition: all var(--t); position: relative;
+    }
+    .roadmap-card::after {
+      content: '→'; position: absolute; right: 1.25rem; top: 50%;
+      transform: translateY(-50%); color: var(--text-light);
+      font-size: 1rem; transition: all var(--t);
+    }
+    .roadmap-card:hover {
+      border-color: var(--moss-light); box-shadow: var(--sh-md);
+      transform: translateY(-1px);
+    }
+    .roadmap-card:hover::after { color: var(--moss); transform: translateY(-50%) translateX(3px); }
+    .roadmap-phase {
+      font-family: 'Inter', sans-serif; font-size: .65rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .1em; color: var(--text-light); margin-bottom: .2rem;
+    }
+    .roadmap-title {
+      font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 700;
+      color: var(--heading); margin-bottom: .25rem;
+    }
+    .roadmap-desc { font-size: .82rem; color: var(--text-muted); line-height: 1.5; max-width: 85%; }
+    .roadmap-meta {
+      font-family: 'Inter', sans-serif; font-size: .7rem; color: var(--text-light);
+      margin-top: .4rem;
+    }
+    .roadmap-tags { display: flex; gap: .3rem; flex-wrap: wrap; margin-top: .5rem; }
+    .tag {
+      font-family: 'Inter', sans-serif; font-size: .7rem; font-weight: 500;
+      padding: .15rem .5rem; border-radius: var(--r-pill);
+      background: var(--surface-2); border: 1px solid var(--border); color: var(--stone);
+    }
+
+    /* ── Glossary ── */
+    .glossary-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-top: .75rem;
+    }
+    .glossary-item {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-sm); padding: .6rem .9rem;
+    }
+    .gterm {
+      display: block; font-family: 'Inter', sans-serif; font-size: .8rem; font-weight: 600;
+      color: var(--moss); margin-bottom: .2rem;
+    }
+    .gdef { font-size: .78rem; color: var(--text-muted); }
+
+    /* ── Start button ── */
+    .start-btn {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-family: 'Inter', sans-serif; font-size: .9rem; font-weight: 700;
+      color: #fff; background: var(--moss);
+      padding: .7rem 1.75rem; border-radius: var(--r-pill);
+      text-decoration: none; margin-top: 1.5rem;
+      box-shadow: 0 4px 16px rgba(90,122,85,.3);
+      transition: all var(--t);
+    }
+    .start-btn:hover { background: var(--moss-light); transform: translateY(-1px); box-shadow: 0 6px 24px rgba(90,122,85,.4); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center; margin-top: 5rem; padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      font-family: 'Inter', sans-serif; font-size: .75rem; color: var(--text-light);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .glossary-grid { grid-template-columns: 1fr; }
+      .top-nav { padding: 0 1rem; }
+    }
+
+    @media print {
+      .top-nav { display: none; }
+      .page { padding-top: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Nav -->
+  <nav class="top-nav">
+    <a href="index.html" class="nav-brand">
+      <div class="brand-icon">📚</div>
+      Learning Path
+    </a>
+    <a href="{{PAPER_HTML}}" class="nav-paper-link">Read Full Paper →</a>
+  </nav>
+
+  <div class="page">
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-label">Learning Path</div>
+      <h1>{{TITLE}}</h1>
+      <p class="subtitle">From foundational prerequisites to a full paper deep-dive. Designed for: <em>{{AUDIENCE}}</em>.</p>
+      <div class="meta-chips">
+        <span class="chip">{{FIELD}}</span>
+        <span class="chip difficulty-{{DIFFICULTY}}">{{DIFFICULTY}}</span>
+        <span class="chip">{{SOURCE_LANG}} → {{TARGET_LANG}}</span>
+        <span class="chip">{{AUTHORS}}</span>
+      </div>
+      <a href="{{FIRST_CHAPTER}}" class="start-btn">Start Learning →</a>
+    </section>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num">{{TOTAL_CHAPTERS}}</div><div class="stat-label">Chapters</div></div>
+      <div class="stat-card"><div class="stat-num">{{TOTAL_PHASES}}</div><div class="stat-label">Phases</div></div>
+      <div class="stat-card"><div class="stat-num">{{TOTAL_CONCEPTS}}</div><div class="stat-label">Concepts</div></div>
+      <div class="stat-card"><div class="stat-num">{{TOTAL_MIN}}</div><div class="stat-label">Min to Read</div></div>
+    </div>
+
+    <!-- Prerequisites -->
+    <div class="prereq-box">
+      <h3>🎓 What you should already know</h3>
+      <ul>{{BASE_CONCEPTS}}</ul>
+      <p style="font-size:.82rem; color:var(--text-light); margin-top:.75rem; margin-bottom:0;">
+        If you're missing any of these, study them first before starting the learning path.
+      </p>
+    </div>
+
+    <!-- Roadmap -->
+    <h2>Learning Roadmap</h2>
+    <p style="font-size:.88rem; color:var(--text-muted); margin-bottom:1rem;">
+      Each chapter builds on the previous. Read in order for best results.
+    </p>
+    <div class="roadmap">{{ROADMAP_ITEMS}}</div>
+
+    <!-- Glossary -->
+    <h2>Key Terms Glossary</h2>
+    {{GLOSSARY}}
+
+    <footer>
+      Generated by <strong>paper-to-learning-path</strong> skill ·
+      <a href="{{PAPER_HTML}}">Read Full Translated Paper</a>
+    </footer>
+
+  </div>
+</body>
+</html>

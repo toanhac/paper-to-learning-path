@@ -1,0 +1,32 @@
+{
+  "name": "paper-to-learning-path",
+  "version": "2.0.0",
+  "description": "Convert research papers (PDF) into beautifully translated, nature-inspired HTML with KaTeX math & embedded images, and automatically generate multi-page prerequisite learning paths.",
+  "author": {
+    "name": "ToanHac",
+    "url": "https://github.com/ToanHac/paper-to-learning-path"
+  },
+  "homepage": "https://github.com/ToanHac/paper-to-learning-path",
+  "repository": "https://github.com/ToanHac/paper-to-learning-path",
+  "license": "MIT",
+  "keywords": [
+    "research-paper",
+    "pdf-to-html",
+    "learning-path",
+    "academic-translation",
+    "katex",
+    "latex",
+    "education",
+    "ai-agent",
+    "claude-skill",
+    "cursor-rule",
+    "antigravity"
+  ],
+  "skills": [
+    {
+      "name": "paper-to-learning-path",
+      "path": ".claude/skills/paper-to-learning-path",
+      "description": "Convert research papers to translated HTML and prerequisite learning paths."
+    }
+  ]
+}

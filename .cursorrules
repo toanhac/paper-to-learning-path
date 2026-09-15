@@ -1,0 +1,15 @@
+# Paper to Learning Path Skill Instructions
+
+When the user asks to translate, convert, or explain a research paper (PDF), or wants a learning path / guide for a paper:
+
+1. Follow the procedure described in `.agents/skills/paper-to-learning-path/SKILL.md` (or `.claude/skills/paper-to-learning-path/SKILL.md`).
+2. Use the pipeline scripts in `scripts/`:
+   - `scripts/check_deps.py`
+   - `scripts/extract_pdf.py`
+   - `scripts/detect_lang.py`
+   - `scripts/translate_content.py`
+   - `scripts/render_html.py`
+   - `scripts/analyze_paper.py`
+   - `scripts/generate_learning_path.py`
+3. Always preserve LaTeX math expressions verbatim in all translations.
+4. Fill in chapter educational content when generating a learning path.

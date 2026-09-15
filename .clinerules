@@ -1,0 +1,9 @@
+# Cline & Roo Code Agent Guidelines — paper-to-learning-path
+
+This workspace includes the `paper-to-learning-path` skill.
+
+When asked to convert, translate, or explain any research paper (PDF), or create a prerequisite learning path:
+1. Refer to `.agents/skills/paper-to-learning-path/SKILL.md` for full instructions.
+2. Execute the python pipeline scripts in `.agents/skills/paper-to-learning-path/scripts/`.
+3. Never modify or translate mathematical equations (`$...$`, `$$...$$`, `\[...\]`).
+4. Generate self-contained HTML files using the nature-inspired design system.

@@ -1,0 +1,11 @@
+# Windsurf Cascade Guidelines — paper-to-learning-path
+
+When processing user requests regarding research papers (PDFs), paper translations, or research learning guides:
+- Activate the skill at `.agents/skills/paper-to-learning-path/SKILL.md`.
+- Run pipeline scripts via python terminal:
+  - `python .agents/skills/paper-to-learning-path/scripts/extract_pdf.py`
+  - `python .agents/skills/paper-to-learning-path/scripts/translate_content.py`
+  - `python .agents/skills/paper-to-learning-path/scripts/render_html.py`
+  - `python .agents/skills/paper-to-learning-path/scripts/analyze_paper.py`
+  - `python .agents/skills/paper-to-learning-path/scripts/generate_learning_path.py`
+- Ensure all LaTeX math expressions are rendered via KaTeX without translation alterations.

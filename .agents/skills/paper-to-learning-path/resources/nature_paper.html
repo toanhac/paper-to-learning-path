@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="{{TARGET_LANG}}" data-theme="nature">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="{{TITLE}} — Translated research paper"/>
+  <title>{{TITLE}}</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
+  <!-- KaTeX -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous"/>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\\\[',right:'\\\\]',display:true},{left:'\\\\(',right:'\\\\)',display:false}],throwOnError:false})"></script>
+
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       NATURE-INSPIRED PAPER TRANSLATION TEMPLATE v2
+       ═══════════════════════════════════════════════════════ */
+    :root {
+      --bg:           #f5f0e8;
+      --surface:      #faf7f2;
+      --surface-2:    #ede8df;
+      --border:       #d4c9b5;
+      --border-dark:  #b8a990;
+      --moss:         #5a7a55;
+      --moss-light:   #7a9e74;
+      --moss-pale:    #d6e8d0;
+      --stone:        #8a7e6e;
+      --stone-light:  #b0a492;
+      --lake:         #4a7a8a;
+      --lake-pale:    #d0e3e8;
+      --amber:        #8a6e3a;
+      --amber-pale:   #f0e0c0;
+      --text:         #2d2820;
+      --text-muted:   #6b5e4e;
+      --text-light:   #9a8e7e;
+      --heading:      #3a4e35;
+      --math-bg:      #edf2ed;
+      --code-bg:      #e8e3da;
+
+      --r-sm: 6px; --r-md: 12px; --r-lg: 20px; --r-pill: 999px;
+      --sh-sm: 0 2px 8px rgba(90,70,40,.08);
+      --sh-md: 0 4px 20px rgba(90,70,40,.12);
+      --sh-lg: 0 8px 40px rgba(90,70,40,.16);
+      --t: 220ms ease;
+      --nav-h: 60px;
+      --toc-w: 240px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    body {
+      font-family: 'Source Serif 4', Georgia, serif;
+      background: var(--bg);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      color: var(--text); line-height: 1.8; min-height: 100vh;
+    }
+
+    /* ── Top Nav ── */
+    .top-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      height: var(--nav-h);
+      background: rgba(245,240,232,.92);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.5rem;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: .6rem;
+      font-family: 'Inter', sans-serif; font-weight: 700; font-size: .85rem;
+      color: var(--heading); text-decoration: none;
+    }
+    .brand-dot {
+      width: 10px; height: 10px; border-radius: 50%; background: var(--moss);
+    }
+    .nav-learning-link {
+      font-family: 'Inter', sans-serif; font-size: .78rem; font-weight: 500;
+      color: var(--moss); text-decoration: none;
+      padding: .3rem .85rem; border-radius: var(--r-pill);
+      border: 1px solid rgba(90,122,85,.3);
+      background: var(--moss-pale); transition: all var(--t);
+    }
+    .nav-learning-link:hover { background: var(--moss); color: #fff; }
+
+    /* ── Reading progress ── */
+    .progress-bar {
+      position: fixed; top: var(--nav-h); left: 0; right: 0; z-index: 199;
+      height: 3px; background: var(--border);
+    }
+    .progress-fill {
+      height: 100%; background: linear-gradient(90deg, var(--moss), var(--lake));
+      width: 0%; transition: width .1s linear;
+    }
+
+    /* ── Layout ── */
+    .layout {
+      display: flex; min-height: 100vh;
+      padding-top: calc(var(--nav-h) + 3px);
+    }
+
+    /* ── Sidebar TOC ── */
+    .toc {
+      position: sticky; top: calc(var(--nav-h) + 3px); align-self: flex-start;
+      width: var(--toc-w); max-height: calc(100vh - var(--nav-h) - 3px);
+      overflow-y: auto; padding: 1.5rem 1rem; flex-shrink: 0;
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .toc-label {
+      font-family: 'Inter', sans-serif; font-size: .65rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .12em; color: var(--moss);
+      margin-bottom: .75rem; padding-bottom: .5rem;
+      border-bottom: 2px solid var(--moss-pale);
+    }
+    .toc ul { list-style: none; }
+    .toc li { margin-bottom: .1rem; }
+    .toc a {
+      display: block; font-family: 'Inter', sans-serif; font-size: .78rem;
+      color: var(--text-muted); text-decoration: none;
+      padding: .3rem .6rem; border-radius: var(--r-sm);
+      border-left: 2px solid transparent; transition: all var(--t);
+    }
+    .toc a:hover { color: var(--moss); background: var(--moss-pale); border-left-color: var(--moss); }
+    .toc a.active { color: var(--moss); background: var(--moss-pale); border-left-color: var(--moss); }
+
+    /* ── Main ── */
+    .main { flex: 1; padding: 2.5rem 2rem 6rem; }
+    .content-wrapper { max-width: 760px; margin: 0 auto; }
+
+    /* ── Paper header card ── */
+    .paper-header {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 2.25rem 2.25rem 2rem;
+      margin-bottom: 3rem; position: relative; overflow: hidden;
+      box-shadow: var(--sh-md);
+    }
+    .paper-header::before {
+      content: ''; position: absolute; top: -50px; right: -50px;
+      width: 200px; height: 200px; border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(90,122,85,.1) 0%, transparent 70%);
+    }
+    .paper-header::after {
+      content: ''; position: absolute; bottom: -40px; left: -40px;
+      width: 150px; height: 150px; border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(74,122,138,.08) 0%, transparent 70%);
+    }
+    .paper-title {
+      font-family: 'Inter', sans-serif; font-size: clamp(1.3rem, 3vw, 1.9rem);
+      font-weight: 800; color: var(--heading); line-height: 1.25;
+      margin-bottom: .75rem; position: relative; z-index: 1;
+    }
+    .paper-authors {
+      font-family: 'Inter', sans-serif; font-size: .85rem; color: var(--stone);
+      margin-bottom: 1.25rem; position: relative; z-index: 1;
+    }
+    .badges { display: flex; flex-wrap: wrap; gap: .4rem; position: relative; z-index: 1; }
+    .badge {
+      display: inline-flex; align-items: center; gap: .3rem;
+      font-family: 'Inter', sans-serif; font-size: .72rem; font-weight: 600;
+      padding: .22rem .7rem; border-radius: var(--r-pill); border: 1px solid;
+    }
+    .badge-lang { color: var(--moss); background: var(--moss-pale); border-color: rgba(90,122,85,.3); }
+    .badge-meta { color: var(--stone); background: var(--surface-2); border-color: var(--border); }
+
+    /* ── Section headings ── */
+    .section-heading {
+      font-family: 'Inter', sans-serif; font-size: 1.3rem; font-weight: 700;
+      color: var(--heading); margin: 2.5rem 0 .75rem;
+      padding-left: .8rem; border-left: 3px solid var(--moss);
+      line-height: 1.4;
+    }
+    .section-heading .original-lang {
+      display: block; font-size: .7rem; font-weight: 400; font-style: italic;
+      color: var(--text-light); margin-top: .2rem;
+    }
+
+    /* ── Paragraphs ── */
+    .paper-paragraph {
+      margin-bottom: 1.15rem; font-size: .95rem;
+      text-align: justify; hyphens: auto;
+    }
+
+    /* ── Math blocks ── */
+    .math-block {
+      background: var(--math-bg); border: 1px solid rgba(90,122,85,.2);
+      border-radius: var(--r-md); padding: 1.25rem 1.5rem;
+      margin: 1.5rem 0; overflow-x: auto; text-align: center;
+      box-shadow: var(--sh-sm);
+    }
+
+    /* ── Info boxes ── */
+    .info-box {
+      border-radius: var(--r-md); padding: 1rem 1.25rem;
+      margin: 1.5rem 0; border-left: 4px solid;
+    }
+    .info-box.note    { background: var(--lake-pale);  border-color: var(--lake);  }
+    .info-box.tip     { background: var(--moss-pale);  border-color: var(--moss);  }
+    .info-box.warning { background: var(--amber-pale); border-color: var(--amber); }
+    .info-box.important { background: #fce8e8; border-color: #c0392b; }
+    .box-label {
+      font-family: 'Inter', sans-serif; font-size: .7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .1em;
+      margin-bottom: .4rem; opacity: .8;
+    }
+    .info-box p { margin-bottom: 0; font-size: .9rem; }
+
+    /* ── Lists ── */
+    .paper-list { margin: .75rem 0 1.15rem 1.5rem; }
+    .paper-list li { margin-bottom: .35rem; font-size: .95rem; }
+
+    /* ── Figures ── */
+    .paper-figure {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-md); padding: 1.25rem;
+      margin: 2rem 0; box-shadow: var(--sh-sm);
+      transition: box-shadow var(--t), transform var(--t);
+    }
+    .paper-figure:hover { box-shadow: var(--sh-md); transform: translateY(-1px); }
+    .paper-figure img { display: block; max-width: 100%; height: auto; margin: 0 auto; border-radius: var(--r-sm); }
+    .figure-caption {
+      font-family: 'Inter', sans-serif; font-size: .8rem; color: var(--text-muted);
+      text-align: center; margin-top: .75rem; font-style: italic; line-height: 1.5;
+    }
+
+    /* ── Code ── */
+    pre {
+      background: var(--code-bg); border-radius: var(--r-md);
+      padding: 1rem 1.25rem; overflow-x: auto; margin: 1.25rem 0;
+      border: 1px solid var(--border); font-size: .82rem;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+    }
+    p code, li code {
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      background: var(--code-bg); padding: .1rem .35rem;
+      border-radius: 4px; font-size: .84em;
+    }
+
+    /* ── Tables ── */
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; margin: 1.25rem 0; }
+    th {
+      font-family: 'Inter', sans-serif; font-weight: 600; font-size: .8rem;
+      background: var(--surface-2); padding: .6rem 1rem;
+      text-align: left; border-bottom: 1px solid var(--border);
+    }
+    td { padding: .55rem 1rem; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+
+    /* ── Scroll-to-top ── */
+    .scroll-top {
+      position: fixed; bottom: 2rem; right: 2rem; width: 44px; height: 44px;
+      border-radius: 50%; background: var(--moss); color: #fff;
+      border: none; cursor: pointer; box-shadow: var(--sh-md);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transform: translateY(10px);
+      transition: opacity var(--t), transform var(--t), background var(--t); z-index: 300;
+    }
+    .scroll-top.visible { opacity: 1; transform: translateY(0); }
+    .scroll-top:hover { background: var(--moss-light); }
+    .scroll-top svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* ── Footer ── */
+    .paper-footer {
+      font-family: 'Inter', sans-serif; font-size: .72rem; color: var(--text-light);
+      text-align: center; margin-top: 4rem; padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .toc { display: none; }
+      .main { padding: 1.5rem 1rem 5rem; }
+      .paper-header { padding: 1.25rem; }
+    }
+
+    @media print {
+      .top-nav, .progress-bar, .toc, .scroll-top { display: none; }
+      .layout { padding-top: 0; }
+      .paper-figure { break-inside: avoid; }
+      .math-block { break-inside: avoid; }
+      body { background: white; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Progress bar -->
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+  <!-- Top Nav -->
+  <nav class="top-nav">
+    <a href="index.html" class="nav-brand">
+      <div class="brand-dot"></div>
+      {{TITLE}}
+    </a>
+    <a href="index.html" class="nav-learning-link">🗺️ Dashboard</a>
+    <a href="learning/index.html" class="nav-learning-link">📚 Learning Path</a>
+  </nav>
+
+  <div class="layout">
+
+    <!-- Sidebar TOC (auto-populated by JS) -->
+    <aside class="toc" aria-label="Table of Contents">
+      <div class="toc-label">Contents</div>
+      <ul id="tocList"></ul>
+    </aside>
+
+    <!-- Main paper content -->
+    <main class="main" role="main">
+      <div class="content-wrapper">
+
+        <header class="paper-header">
+          <h1 class="paper-title">{{TITLE}}</h1>
+          <p class="paper-authors">{{AUTHORS}}</p>
+          <div class="badges">
+            <span class="badge badge-lang">{{SOURCE_LANG}} → {{TARGET_LANG}}</span>
+            <span class="badge badge-meta">{{PAGES}} pages</span>
+            <span class="badge badge-meta">{{SOURCE_FILE}}</span>
+          </div>
+        </header>
+
+        <article id="paper-body">
+          {{CONTENT}}
+        </article>
+
+        <footer class="paper-footer">
+          Generated by <strong>paper-to-learning-path</strong> ·
+          Source: {{SOURCE_FILE}} · {{SOURCE_LANG}} → {{TARGET_LANG}} ·
+          <a href="learning/index.html">📚 View Learning Path</a>
+        </footer>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Scroll to top -->
+  <button class="scroll-top" id="scrollTopBtn" aria-label="Scroll to top"
+          onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+  </button>
+
+  <script>
+    // Reading progress
+    const fill = document.getElementById('progressFill');
+    function updateProgress() {
+      const el = document.documentElement;
+      const prog = el.scrollTop / (el.scrollHeight - el.clientHeight) * 100;
+      fill.style.width = Math.min(100, prog) + '%';
+    }
+    window.addEventListener('scroll', updateProgress, {passive: true});
+    updateProgress();
+
+    // Scroll-to-top visibility
+    const btn = document.getElementById('scrollTopBtn');
+    window.addEventListener('scroll', () => btn.classList.toggle('visible', window.scrollY > 400), {passive: true});
+
+    // Auto-build TOC from section headings
+    const tocList = document.getElementById('tocList');
+    document.querySelectorAll('#paper-body .section-heading[id]').forEach(h => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.firstChild.textContent.trim();
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+
+    // Active TOC link on scroll
+    const headings = document.querySelectorAll('#paper-body .section-heading[id]');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        const link = tocList.querySelector(`a[href="#${e.target.id}"]`);
+        if (link) link.classList.toggle('active', e.isIntersecting);
+      });
+    }, {rootMargin: '-15% 0px -70% 0px'});
+    headings.forEach(h => observer.observe(h));
+  </script>
+</body>
+</html>

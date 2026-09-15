@@ -1,0 +1,14 @@
+{
+  "name": "paper-to-learning-path",
+  "version": "2.0.0",
+  "displayName": "Paper to Learning Path & HTML Translator",
+  "description": "Transform research PDFs into interactive translated HTML pages and generate step-by-step prerequisite learning courses.",
+  "category": "Education & Research",
+  "tags": ["research", "pdf", "translation", "learning-path", "katex", "math", "computer-vision", "machine-learning"],
+  "icon": "📚",
+  "compatibility": {
+    "claudeCode": ">=1.0.0",
+    "claudeDesktop": ">=1.0.0"
+  },
+  "documentationUrl": "https://github.com/ToanHac/paper-to-learning-path#readme"
+}
