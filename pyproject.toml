@@ -4,7 +4,7 @@ build-backend = "setuptools.backends.legacy:build"
 
 [project]
 name = "paper-to-learning-path"
-version = "2.1.0"
+version = "2.1.1"
 description = "AI agent skill: convert research PDFs into translated HTML + prerequisite learning path"
 readme = "README.md"
 license = { file = "LICENSE" }

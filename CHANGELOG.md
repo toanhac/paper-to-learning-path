@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.1] — 2026-09-15
+
+### Added
+- **Native AI Agent Translation (Zero API Keys)** — AI Agent translates documents directly using its own language reasoning, removing the need for external API keys or subscriptions. Added `--scaffold`, `--verify`, and `--stats` to `scripts/translate_content.py`.
+
+### Changed
+- Minimal dependencies: only `pymupdf` and `langdetect` required for core pipeline.
+
+---
+
 ## [2.1.0] — 2026-09-15
 
 ### Added
@@ -18,7 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - New template: `resources/nature_setup.html` with copy-to-clipboard code blocks, collapsible FAQ, and reading progress bar
 - **Interactive CLI pre-flight questions** — Agent asks user which features to enable before running
   - New flags: `--learning-path` / `--no-learning-path`, `--setup-guide` / `--no-setup-guide`, `--non-interactive`
-- **Native AI Agent Translation (Zero API Keys)** — AI Agent translates documents directly using its own language reasoning, removing the need for external API keys or subscriptions. Added `--scaffold`, `--verify`, and `--stats` to `scripts/translate_content.py`.
 - **SKILL.md** updated with Pre-Flight Q&A section, Steps 9–12, updated output structure
 
 ### Changed
