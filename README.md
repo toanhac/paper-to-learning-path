@@ -2,94 +2,288 @@
 
 # 📄 paper-to-learning-path
 
-**An AI agent skill that transforms academic research PDFs into beautifully translated, nature-inspired HTML pages and automatically generates multi-page prerequisite learning paths.**
+**An AI agent skill that transforms research paper PDFs into beautifully translated HTML pages, multi-page prerequisite learning paths, and detailed repository setup guides.**
 
 <p align="center">
   <a href="README.vi.md">🇻🇳 Tiếng Việt</a> |
   <a href="README.md">🇺🇸 English</a>
 </p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Python: 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue.svg?logo=python&logoColor=white)](https://python.org)
-[![Platform: Antigravity](https://img.shields.io/badge/Antigravity-Ready-4285F4?logo=google&logoColor=white)](https://antigravity.dev)
-[![Platform: Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin%20%26%20Skill-D97706?logo=anthropic&logoColor=white)](https://claude.ai)
-[![Platform: Cursor](https://img.shields.io/badge/Cursor-Rules%20%26%20Agent-000000?logo=cursor&logoColor=white)](https://cursor.sh)
-[![Platform: Windsurf](https://img.shields.io/badge/Windsurf-Cascade-0284C7)](https://codeium.com/windsurf)
-[![Platform: Cline](https://img.shields.io/badge/Cline-Roo%20Code-10B981)](https://github.com/cline/cline)
+<p align="center">
+  <a href="https://github.com/ToanHac/paper-to-learning-path/releases"><img src="https://img.shields.io/github/v/release/ToanHac/paper-to-learning-path?style=for-the-badge&color=5a7a55" alt="GitHub Release"></a>
+  <img src="https://img.shields.io/badge/Python-3.9%2B-blue?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.9+">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License MIT"></a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Antigravity-Ready-4285F4?style=flat-square&logo=google&logoColor=white" alt="Antigravity">
+  <img src="https://img.shields.io/badge/Claude%20Code-Plugin%20Ready-D97706?style=flat-square&logo=anthropic&logoColor=white" alt="Claude Code">
+  <img src="https://img.shields.io/badge/Cursor-Rules%20Ready-000000?style=flat-square" alt="Cursor">
+  <img src="https://img.shields.io/badge/Windsurf-Cascade-0284C7?style=flat-square" alt="Windsurf">
+  <img src="https://img.shields.io/badge/Cline%20%2F%20Roo%20Code-10B981?style=flat-square" alt="Cline">
+</p>
 
 </div>
 
 ---
 
-## 🌟 Overview
+## 🌟 What It Does
 
-When reading cutting-edge scientific research papers (e.g. *3D Gaussian Splatting, Diffusion Models, State Space Models*), researchers and students encounter two major bottlenecks:
-1. **Formatting & Math Loss:** Traditional translation tools break LaTeX math formulas ($\LaTeX$), destroy diagrams, and produce cluttered files.
-2. **The Prerequisite Knowledge Gap:** Complex papers assume deep prior knowledge. Without understanding the foundational concepts, reading the paper is overwhelming.
+When reading cutting-edge AI/ML research papers (e.g. *3D Gaussian Splatting, Diffusion Models, Transformers, NeRF*), researchers and students face two major bottlenecks:
 
-**`paper-to-learning-path`** solves both challenges seamlessly:
-- **Zero Math Corruption:** All LaTeX equations and citation markers are protected with placeholder tokens during translation and rendered beautifully via KaTeX.
-- **Embedded Visuals:** PDF figures and charts are automatically extracted as high-res PNGs and embedded as Base64 data inside a single self-contained HTML file.
-- **Nature-Inspired UI:** Calming earth & foliage color palette, reading progress bar, responsive sidebar TOC, and academic typography.
-- **Automatic Prerequisite Learning Path:** The AI analyzes the paper's concepts, determines prerequisite topics, and scaffolds an interactive multi-chapter learning website (roadmap index + prerequisite modules + paper deep dive).
+1. **Formatting & Math Loss** — Translation tools break LaTeX formulas, destroy figures, and produce cluttered outputs.
+2. **The Prerequisites Gap** — Complex papers assume deep background knowledge. Without it, reading is overwhelming.
+
+**`paper-to-learning-path`** solves both challenges with a complete learning ecosystem:
+
+| Output | Description |
+|--------|-------------|
+| 📄 `paper.html` | Self-contained translated HTML — KaTeX math, embedded images, sidebar TOC |
+| 🗺️ `index.html` | Central dashboard hub — stats, quick links, learning roadmap |
+| 📚 `learning/` | Multi-chapter prerequisite site — C1: Transformers, C2: Attention, … → Deep-dive |
+| 🔧 `setup-guide.html` | Full repo setup guide — clone, environment, dataset, training, inference, FAQ |
 
 ---
 
-## 🚀 One-Line Quick Install
+## 🚀 Quick Start
 
-### macOS / Linux / WSL
-```bash
-curl -fsSL https://raw.githubusercontent.com/ToanHac/paper-to-learning-path/main/install.sh | bash
-```
+### 1. Clone the repository
 
-### Windows (PowerShell)
-```powershell
-irm https://raw.githubusercontent.com/ToanHac/paper-to-learning-path/main/install.ps1 | iex
-```
-
-### Python Manual Setup
 ```bash
 git clone https://github.com/ToanHac/paper-to-learning-path.git
 cd paper-to-learning-path
+```
+
+### 2. Install Python dependencies
+
+```bash
 pip install pymupdf deep-translator langdetect
-python scripts/install.py --all
+```
+
+### 3. Install for your AI assistant (choose one below)
+
+Then **use your AI assistant** to process any research paper:
+
+```
+Translate ./paper.pdf to Vietnamese and generate a complete learning path with repo setup guide.
 ```
 
 ---
 
-## 🛠️ Multi-Platform Installation Guide
+## 🛠️ Installation by AI Assistant
 
-| Platform | Setup & Activation |
-| :--- | :--- |
-| **Google Antigravity** | Clone into workspace `.agents/skills/paper-to-learning-path` or global `~/.gemini/antigravity/skills/`. The agent auto-activates when research PDFs are discussed. |
-| **Anthropic Claude Code** | Included via `.claude-plugin/plugin.json` and `.claude/skills/paper-to-learning-path/`. Use `/add-dir .agents/skills/paper-to-learning-path` if adding manually. |
-| **Cursor IDE** | Configured via `.cursor/rules/paper-to-learning-path.mdc` and `.cursorrules`. Cursor Agent detects PDF conversion prompts automatically. |
-| **Windsurf (Cascade)** | Pre-configured via `.windsurfrules`. Prompt Cascade in chat to process any PDF. |
-| **Cline / Roo Code** | Configured via `.clinerules`. Invoke translation or learning path generation in chat. |
-| **Aider** | Run: `aider --read .agents/skills/paper-to-learning-path/SKILL.md` |
-| **Standalone CLI (No AI chat)** | Run directly in terminal: `python scripts/cli.py --pdf paper.pdf --target vi` |
+### ⚡ Google Antigravity
+
+Antigravity auto-discovers skills in `.agents/skills/<name>/SKILL.md`. No extra configuration needed — just copy the folder to your project.
+
+**Option A — Per-project (recommended):**
+
+```bash
+# In your project root
+cp -r /path/to/paper-to-learning-path/.agents/skills/paper-to-learning-path \
+      .agents/skills/paper-to-learning-path
+```
+
+**Option B — Global (available in all projects):**
+
+```bash
+# macOS / Linux / WSL
+cp -r .agents/skills/paper-to-learning-path \
+      ~/.gemini/antigravity/skills/paper-to-learning-path
+
+# Windows (PowerShell)
+Copy-Item -Recurse .agents\skills\paper-to-learning-path `
+  "$env:USERPROFILE\.gemini\antigravity\skills\paper-to-learning-path"
+```
+
+**Activation:** Just open Antigravity in your project and say:
+
+```
+Translate ./papers/attention.pdf to Vietnamese with a full learning path.
+```
+
+The skill activates automatically when you mention PDF files or research papers.
 
 ---
 
-## 💬 Example AI Agent Prompts
+### 🤖 Anthropic Claude Code
 
-Once installed, simply prompt your favorite AI coding assistant:
+Two installation methods are supported:
 
-```text
-Translate ./papers/2510.08575v3.pdf to Vietnamese and generate a comprehensive learning path for it.
+#### Method 1 — Claude Plugin (Marketplace)
+
+```bash
+/plugin marketplace add ToanHac/paper-to-learning-path
+/plugin install paper-to-learning-path@paper-to-learning-path
 ```
 
-```text
-Convert this research paper ./attention.pdf to Vietnamese HTML with a step-by-step learning guide.
+#### Method 2 — Manual Skill Installation
+
+```bash
+# Copy skill to Claude's skill discovery path
+cp -r .claude/skills/paper-to-learning-path ~/.claude/skills/paper-to-learning-path
+
+# Or add to your project (per-project)
+cp -r .claude/skills/paper-to-learning-path .claude/skills/paper-to-learning-path
 ```
 
-```text
-Translate ./paper.pdf to French (mode: paper-only).
+Then add to your Claude project context:
+
+```bash
+/add-dir .claude/skills/paper-to-learning-path
+```
+
+**Activation prompt examples:**
+
+```
+Translate ./paper.pdf to Vietnamese and generate a learning path.
+```
+
+```
+Convert this research paper ./resplat.pdf to French with a complete prerequisite guide.
+```
+
+> **Tip:** The `CLAUDE.md` file at the project root is automatically read by Claude Code as project context — no extra steps needed if you clone the full repo.
+
+---
+
+### 🖱️ Cursor IDE
+
+The `.cursor/rules/paper-to-learning-path.mdc` file is auto-detected by Cursor Agent.
+
+**Installation:**
+
+```bash
+# Copy rule to your project
+mkdir -p .cursor/rules
+cp .cursor/rules/paper-to-learning-path.mdc .cursor/rules/
+```
+
+Or copy the entire `.cursorrules` file to your project root:
+
+```bash
+cp .cursorrules /path/to/your/project/.cursorrules
+```
+
+**Full skill (with scripts):**
+
+```bash
+cp -r .agents/skills/paper-to-learning-path \
+      /path/to/your/project/.agents/skills/paper-to-learning-path
+```
+
+**Activation:** Open Cursor Agent (`Ctrl+Shift+P` → "Open Composer") and type:
+
+```
+Translate ./paper.pdf to Vietnamese and generate a learning path.
+```
+
+Cursor automatically applies the rule for PDF-to-HTML translation requests.
+
+---
+
+### 🌊 Windsurf (Cascade)
+
+**Installation:**
+
+```bash
+# Copy Windsurf rules to your project root
+cp .windsurfrules /path/to/your/project/.windsurfrules
+
+# Copy skill scripts
+cp -r .agents/skills/paper-to-learning-path \
+      /path/to/your/project/.agents/skills/paper-to-learning-path
+```
+
+**Activation:** Open Windsurf Cascade chat and type:
+
+```
+Translate ./paper.pdf to Vietnamese using the paper-to-learning-path skill.
 ```
 
 ---
 
-## 🏗️ 8-Step Pipeline Architecture
+### 🧩 Cline / Roo Code
+
+**Installation:**
+
+```bash
+cp .clinerules /path/to/your/project/.clinerules
+cp -r .agents/skills/paper-to-learning-path \
+      /path/to/your/project/.agents/skills/paper-to-learning-path
+```
+
+**Activation:** In Cline / Roo Code chat:
+
+```
+Use paper-to-learning-path to translate ./paper.pdf to Vietnamese.
+```
+
+---
+
+### ⌨️ Aider
+
+```bash
+aider --read .agents/skills/paper-to-learning-path/SKILL.md
+```
+
+Then prompt:
+
+```
+/ask Translate ./paper.pdf to Vietnamese with a learning path.
+```
+
+---
+
+### 🖥️ Standalone CLI (No AI Required)
+
+Run the full pipeline directly from your terminal:
+
+```bash
+# Interactive mode — asks which features to enable
+python .agents/skills/paper-to-learning-path/scripts/cli.py --pdf paper.pdf
+
+# Full pipeline (paper + learning path + setup guide)
+python .agents/skills/paper-to-learning-path/scripts/cli.py \
+    --pdf paper.pdf \
+    --target vi \
+    --learning-path \
+    --setup-guide
+
+# Paper translation only
+python .agents/skills/paper-to-learning-path/scripts/cli.py \
+    --pdf paper.pdf --target fr \
+    --no-learning-path --no-setup-guide
+```
+
+---
+
+## 💬 Example Prompts
+
+Once installed in any AI assistant, just describe what you want:
+
+```
+Translate ./papers/attention.pdf to Vietnamese and generate a complete learning path
+with a repo setup guide.
+```
+
+```
+Convert this research paper ./resplat.pdf to French. I need the learning path
+for a beginner with basic Python knowledge.
+```
+
+```
+Translate ./3dgs.pdf to Chinese (zh). Paper-only mode, no learning path needed.
+```
+
+```
+Generate a setup guide for the repo in ./resplat.pdf — I want to clone it, set up
+the environment, and run the demo.
+```
+
+---
+
+## 🏗️ Pipeline Architecture (12 Steps)
 
 ```
                        [ Input: PDF File ]
@@ -104,20 +298,24 @@ Translate ./paper.pdf to French (mode: paper-only).
     [Step 3] detect_lang.py      ──► Auto-detect source language
                                 │
                                 ▼
-    [Step 4] translate_content   ──► Translate with LaTeX placeholder protection
+    [Step 4] translate_content   ──► Translate (LaTeX placeholders protected)
                                 │
                  ┌──────────────┴──────────────┐
                  ▼                             ▼
     [Step 5] render_html.py         [Step 6] analyze_paper.py
-    ──► Self-contained paper.html    ──► Extract concepts & Prerequisites
-        (Nature UI, KaTeX math)                │
-                                               ▼
-                                    [Step 7] generate_learning_path.py
-                                     ──► Scaffold Index & Chapter HTML files
-                                               │
-                                               ▼
-                                    [Step 8] AI Agent writes Chapter Content
-                                     ──► Full Multi-Page Educational Site!
+    ──► paper.html (Nature UI)       ──► Extract concepts + prerequisites
+                                                │
+                                                ▼
+                                    [Step 7] generate_setup_guide.py
+                                     ──► setup-guide.html (optional)
+                                                │
+                                                ▼
+                                    [Step 8] generate_learning_path.py
+                                     ──► learning/ chapters + index.html dashboard
+                                                │
+                                                ▼
+                                    [Steps 9-11] AI Agent writes content
+                                     ──► Full educational ecosystem!
 ```
 
 ---
@@ -126,62 +324,80 @@ Translate ./paper.pdf to French (mode: paper-only).
 
 ```
 paper-to-learning-path/
-├── README.md                                   # English documentation
+├── README.md                                   # English documentation (this file)
 ├── README.vi.md                                # Vietnamese documentation
 ├── LICENSE                                     # MIT License
 ├── CHANGELOG.md                                # Version history
-├── pyproject.toml                              # Python package configuration
-├── install.sh                                  # One-line installer for Linux/macOS
-├── install.ps1                                 # One-line installer for Windows
-├── .gitignore
+├── CLAUDE.md                                   # Claude Code project context
+├── .cursorrules                                # Cursor fallback rules
+├── .clinerules                                 # Cline / Roo Code rules
+├── .windsurfrules                              # Windsurf Cascade rules
+├── install.sh                                  # One-line installer (macOS/Linux)
+├── install.ps1                                 # One-line installer (Windows)
 │
-├── .agents/skills/paper-to-learning-path/      # Primary Skill package
-│   ├── SKILL.md                               # Agent instruction manifest (8 steps)
+├── .agents/skills/paper-to-learning-path/      ← Primary Skill Package
+│   ├── SKILL.md                               # Agent instruction manifest (12 steps)
 │   ├── scripts/
 │   │   ├── check_deps.py                      # Dependency checker
 │   │   ├── extract_pdf.py                     # PDF text/math/image extractor
-│   │   ├── detect_lang.py                     # Language detection
+│   │   ├── detect_lang.py                     # Language auto-detection
 │   │   ├── translate_content.py               # Math-safe translation engine
-│   │   ├── render_html.py                     # Nature HTML renderer
-│   │   ├── analyze_paper.py                   # Paper prerequisite analyzer
-│   │   ├── generate_learning_path.py          # Learning site scaffolder
-│   │   └── cli.py                             # Standalone CLI runner
+│   │   ├── render_html.py                     # Nature-inspired HTML renderer
+│   │   ├── analyze_paper.py                   # Paper concept & prereq analyzer
+│   │   ├── generate_learning_path.py          # Multi-chapter site scaffolder + dashboard
+│   │   ├── generate_setup_guide.py            # Repo setup guide generator
+│   │   └── cli.py                             # Interactive CLI pipeline runner
 │   ├── resources/
 │   │   ├── nature_paper.html                  # Paper translation template
+│   │   ├── nature_dashboard.html              # Central dashboard template
 │   │   ├── nature_index.html                  # Roadmap index template
-│   │   └── nature_learning.html               # Learning chapter template
-│   └── references/                            # Documentation references
+│   │   ├── nature_learning.html               # Learning chapter template
+│   │   └── nature_setup.html                  # Setup guide template
+│   └── references/
+│       ├── platform-notes.md
+│       ├── dependencies.md
+│       ├── translation-engines.md
+│       └── template-design.md
 │
-├── .claude-plugin/                             # Claude Marketplace integration
+├── .claude/skills/paper-to-learning-path/      ← Claude Code mirror
+├── .claude-plugin/                              ← Claude Plugin manifest
 │   ├── plugin.json
 │   └── marketplace.json
-├── .cursor/rules/                              # Cursor IDE rules
-│   └── paper-to-learning-path.mdc
-├── .clinerules                                 # Cline / Roo Code rules
-├── .windsurfrules                              # Windsurf Cascade rules
-├── CLAUDE.md                                   # Claude Code instructions
-├── examples/resplat/                           # Live example (ReSplat ECCV 2025 demo)
-└── docs/how-it-works.md                        # In-depth technical architecture
+├── .cursor/rules/paper-to-learning-path.mdc    ← Cursor auto-activate rule
+├── docs/how-it-works.md                        ← Technical architecture
+└── examples/resplat/                           ← Live demo (ReSplat ECCV 2025)
 ```
 
 ---
 
-## 🎨 Nature-Inspired Visual Philosophy
+## 🎨 Nature-Inspired Design System
 
-- **Organic Color System:** Deep moss green (`#5a7a55`), Warm sand (`#ede8df`), Natural stone (`#8a7e6e`), Lake blue (`#4a7a8a`), Warm parchment background (`#f5f0e8`).
-- **Academic Typography:** High-readability Serif typography paired with crisp Sans-serif labels and JetBrains Mono for equations and code blocks.
-- **Micro-Interactions:** Subtle sunlight shift transitions (220ms), fixed reading progress bar, floating sidebar TOC with intersection observer tracking.
-- **Educational Callout Boxes:** Standardized Note, Tip, Warning, and Important info cards.
+All generated HTML pages share a consistent visual language:
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--moss` | `#5a7a55` | Primary accent (buttons, links) |
+| `--bg` | `#f5f0e8` | Warm parchment background |
+| `--surface` | `#faf7f2` | Card surfaces |
+| `--lake` | `#4a7a8a` | Alternative accent |
+| `--amber` | `#8a6e3a` | Setup guide accent |
+| `--stone` | `#8a7e6e` | Secondary text |
+
+- **Typography:** `Source Serif 4` for body, `Inter` for UI, `JetBrains Mono` for code
+- **Transitions:** Subtle sunlight-shift effects (220ms ease)
+- **Math:** KaTeX auto-render on all pages
+- **Info boxes:** Note 📝 · Tip 💡 · Warning ⚠️ · Important 🔑
 
 ---
 
 ## 🤝 Contributing
 
 Contributions from the community are warmly welcome!
+
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'feat: Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
+2. Create your feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'feat: Add amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
 5. Open a Pull Request
 
 ---
