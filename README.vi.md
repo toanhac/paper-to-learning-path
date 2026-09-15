@@ -45,27 +45,49 @@ Khi đọc bài báo AI/ML phức tạp (*3D Gaussian Splatting, Diffusion Model
 
 ---
 
-## 🚀 Bắt đầu nhanh
+## 🚀 Cài đặt nhanh (Khuyến nghị)
 
-### 1. Clone repo
+### Dùng npm CLI
 
 ```bash
-git clone https://github.com/ToanHac/paper-to-learning-path.git
-cd paper-to-learning-path
+# 1. Cài CLI toàn cục
+npm install -g paper-to-learning-path-cli
+
+# 2. Vào thư mục project của bạn
+cd /path/to/your/project
+
+# 3. Cài cho AI assistant của bạn
+p2lp init --ai antigravity   # Google Antigravity
+p2lp init --ai claude        # Claude Code
+p2lp init --ai cursor        # Cursor IDE
+p2lp init --ai windsurf      # Windsurf
+p2lp init --ai cline         # Cline / Roo Code
+p2lp init --ai all           # Tất cả platform cùng lúc
 ```
 
-### 2. Cài đặt thư viện Python
+### Thư viện Python (bắt buộc)
 
 ```bash
 pip install pymupdf deep-translator langdetect
 ```
 
-### 3. Cài đặt cho AI assistant của bạn (xem hướng dẫn bên dưới)
+### Các lệnh CLI khác
 
-Sau đó chỉ cần yêu cầu AI assistant của bạn:
-
+```bash
+p2lp init --ai claude --global   # Cài global (dùng cho mọi project)
+p2lp init --ai cursor --dry-run  # Xem trước mà không ghi file
+p2lp update                      # Cập nhật file từ phiên bản mới nhất
+p2lp uninstall --ai cursor       # Gỡ cài đặt một platform cụ thể
+p2lp list                        # Liệt kê tất cả platform được hỗ trợ
 ```
-Dịch ./paper.pdf sang tiếng Việt và tạo lộ trình tự học đầy đủ với hướng dẫn setup repo.
+
+### Cài thủ công (không cần npm)
+
+```bash
+git clone https://github.com/ToanHac/paper-to-learning-path.git
+cd paper-to-learning-path
+pip install pymupdf deep-translator langdetect
+python scripts/install.py --all
 ```
 
 ---

@@ -1,0 +1,37 @@
+{
+  "name": "paper-to-learning-path-cli",
+  "version": "2.1.0",
+  "description": "CLI installer for the paper-to-learning-path AI agent skill — translate research PDFs to HTML + generate learning paths",
+  "keywords": [
+    "ai", "skill", "pdf", "research-paper", "translation",
+    "learning-path", "antigravity", "claude", "cursor", "windsurf",
+    "llm", "machine-learning", "education"
+  ],
+  "author": "ToanHac",
+  "license": "MIT",
+  "homepage": "https://github.com/ToanHac/paper-to-learning-path",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ToanHac/paper-to-learning-path.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ToanHac/paper-to-learning-path/issues"
+  },
+  "bin": {
+    "p2lp": "bin/p2lp.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "assets/"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "scripts": {
+    "postinstall": "node -e \"try{require('fs').chmodSync(require('path').join(__dirname,'bin','p2lp.js'),0o755)}catch(e){}\"",
+    "sync-assets": "node scripts/sync-assets.js",
+    "prepublishOnly": "node scripts/sync-assets.js"
+  },
+  "dependencies": {}
+}

@@ -45,27 +45,49 @@ When reading cutting-edge AI/ML research papers (e.g. *3D Gaussian Splatting, Di
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Install (Recommended)
 
-### 1. Clone the repository
+### Using npm CLI
 
 ```bash
-git clone https://github.com/ToanHac/paper-to-learning-path.git
-cd paper-to-learning-path
+# 1. Install the CLI globally
+npm install -g paper-to-learning-path-cli
+
+# 2. Go to your project
+cd /path/to/your/project
+
+# 3. Install for your AI assistant
+p2lp init --ai antigravity   # Google Antigravity
+p2lp init --ai claude        # Claude Code
+p2lp init --ai cursor        # Cursor IDE
+p2lp init --ai windsurf      # Windsurf
+p2lp init --ai cline         # Cline / Roo Code
+p2lp init --ai all           # All platforms at once
 ```
 
-### 2. Install Python dependencies
+### Python dependencies (required)
 
 ```bash
 pip install pymupdf deep-translator langdetect
 ```
 
-### 3. Install for your AI assistant (choose one below)
+### Other CLI commands
 
-Then **use your AI assistant** to process any research paper:
-
+```bash
+p2lp init --ai claude --global   # Install globally (all projects)
+p2lp init --ai cursor --dry-run  # Preview without writing files
+p2lp update                      # Refresh from installed package version
+p2lp uninstall --ai cursor       # Remove for a specific platform
+p2lp list                        # List all supported platforms
 ```
-Translate ./paper.pdf to Vietnamese and generate a complete learning path with repo setup guide.
+
+### Manual install (without npm)
+
+```bash
+git clone https://github.com/ToanHac/paper-to-learning-path.git
+cd paper-to-learning-path
+pip install pymupdf deep-translator langdetect
+python scripts/install.py --all
 ```
 
 ---
@@ -399,6 +421,35 @@ Contributions from the community are warmly welcome!
 3. Commit your changes: `git commit -m 'feat: Add amazing feature'`
 4. Push to the branch: `git push origin feature/amazing-feature`
 5. Open a Pull Request
+
+---
+
+## 📦 Publishing to npm
+
+> For maintainers only. Run these from the `cli/` directory.
+
+```bash
+# 1. Log in to npm (only needed once per machine)
+npm adduser
+# or if already have account:
+npm login
+
+# 2. Bundle skill files into the package
+npm run sync-assets
+
+# 3. Dry run to verify contents
+npm publish --dry-run
+
+# 4. Publish
+npm publish
+```
+
+After publishing, users can install with:
+
+```bash
+npm install -g paper-to-learning-path-cli
+p2lp init --ai antigravity
+```
 
 ---
 

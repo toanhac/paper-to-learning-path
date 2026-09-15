@@ -34,3 +34,7 @@ Thumbs.db
 # Temporary
 *.tmp
 *.bak
+
+# CLI package (generated assets — built by npm run sync-assets before publish)
+cli/assets/
+cli/node_modules/
