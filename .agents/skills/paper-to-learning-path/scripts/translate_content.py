@@ -1,39 +1,32 @@
 #!/usr/bin/env python3
 """
-translate_content.py — Translate text sections from source to target language.
+translate_content.py — Prepare, scaffold, translate, and verify document translation.
 
-Skips math_block sections entirely. Handles inline math by replacing
-LaTeX tokens with placeholders before translation and restoring them after.
+When running via an AI Agent (Antigravity, Claude Code, Cursor, Windsurf):
+  The Agent translates the document directly using its own LLM intelligence!
+  NO API keys or external services are needed.
+  1. python translate_content.py --scaffold --json extracted.json --target vi --out translated.json
+  2. The Agent translates the text blocks directly into translated.json
+  3. python translate_content.py --verify translated.json
 
-Usage:
-    python translate_content.py \\
-        --json extracted.json \\
-        --source en \\
-        --target vi \\
-        --out translated.json \\
-        [--chunk-delay 0.5] \\
-        [--chunk-size 4000]
+When running standalone in CLI without an AI Agent:
+  Supports external engines via --engine flag (gemini, openai, google fallback).
 """
 
 import argparse
 import json
+import os
 import re
 import sys
 import time
 from copy import deepcopy
-
-try:
-    from deep_translator import GoogleTranslator
-    from deep_translator.exceptions import RequestError, TranslationNotFound
-except ImportError:
-    print("ERROR: deep-translator not installed. Run: pip install deep-translator")
-    sys.exit(1)
+from typing import Callable
 
 
 # ---------------------------------------------------------------------------
-# Math placeholder protection
+# Math / citation placeholder protection
 # ---------------------------------------------------------------------------
-# Matches: $...$ or \(...\) or \[...\] or $$...$$
+
 _MATH_RE = re.compile(
     r"(\$\$[\s\S]+?\$\$"      # display $$ ... $$
     r"|\$[^$\n]{1,300}\$"     # inline $ ... $
@@ -41,18 +34,15 @@ _MATH_RE = re.compile(
     r"|\\\([\s\S]+?\\\))",    # inline \( ... \)
     re.DOTALL,
 )
-
-# Citation patterns like [1], [Author, 2020]
 _CITE_RE = re.compile(r"\[[^\[\]]{1,60}\]")
 
 
 def _protect(text: str) -> tuple[str, dict]:
-    """Replace math/citation tokens with safe placeholders."""
-    placeholders = {}
+    placeholders: dict[str, str] = {}
     counter = [0]
 
     def replace(m):
-        key = f"__MATH_{counter[0]:04d}__"
+        key = f"__PH_{counter[0]:04d}__"
         placeholders[key] = m.group(0)
         counter[0] += 1
         return key
@@ -63,182 +53,283 @@ def _protect(text: str) -> tuple[str, dict]:
 
 
 def _restore(text: str, placeholders: dict) -> str:
-    """Restore protected placeholders to their original content."""
     for key, value in placeholders.items():
         text = text.replace(key, value)
     return text
 
 
+_LANG_NAMES = {
+    "vi": "Vietnamese", "en": "English", "fr": "French",
+    "de": "German",     "es": "Spanish", "zh": "Chinese (Simplified)",
+    "zh-tw": "Chinese (Traditional)", "ja": "Japanese",
+    "ko": "Korean",     "pt": "Portuguese", "it": "Italian",
+    "ru": "Russian",    "ar": "Arabic",     "th": "Thai",
+    "id": "Indonesian", "ms": "Malay",
+}
+
+
+def _lang_name(code: str) -> str:
+    return _LANG_NAMES.get(code.lower(), code.upper())
+
+
 # ---------------------------------------------------------------------------
-# Terminology consistency
+# Agent scaffold & stats helper
 # ---------------------------------------------------------------------------
 
-class TermGlossary:
+def scaffold_document(json_path: str, source: str, target: str, out_path: str):
     """
-    Builds a term map on first pass so repeated technical terms are
-    translated consistently throughout the document.
+    Create a scaffolded translated.json for the AI Agent to translate directly.
+    Math blocks are preserved automatically. Original text is recorded in text_original.
     """
-
-    def __init__(self):
-        self._map: dict[str, str] = {}
-
-    def register(self, original: str, translated: str):
-        # Only register multi-word terms (likely technical)
-        if len(original.split()) >= 2:
-            self._map[original] = translated
-
-    def apply(self, text: str) -> str:
-        for src, tgt in self._map.items():
-            text = text.replace(src, tgt)
-        return text
-
-
-# ---------------------------------------------------------------------------
-# Chunked translation
-# ---------------------------------------------------------------------------
-
-def translate_text(
-    text: str,
-    source: str,
-    target: str,
-    chunk_size: int = 4000,
-    delay: float = 0.5,
-) -> str:
-    """Translate text in chunks, preserving math/citations."""
-    protected, placeholders = _protect(text)
-
-    # Split into chunks at sentence boundaries
-    chunks = _split_chunks(protected, chunk_size)
-    translated_chunks = []
-
-    translator = GoogleTranslator(source=source, target=target)
-
-    for chunk in chunks:
-        if not chunk.strip():
-            translated_chunks.append(chunk)
-            continue
-        try:
-            result = translator.translate(chunk)
-            if result is None:
-                result = chunk
-            translated_chunks.append(result)
-            if delay > 0:
-                time.sleep(delay)
-        except (RequestError, TranslationNotFound, Exception) as e:
-            print(f"  ⚠️  Translation error: {e}. Keeping original chunk.")
-            translated_chunks.append(chunk)
-
-    merged = " ".join(translated_chunks)
-    return _restore(merged, placeholders)
-
-
-def _split_chunks(text: str, max_size: int) -> list[str]:
-    """Split text into chunks no larger than max_size, splitting at sentence ends."""
-    if len(text) <= max_size:
-        return [text]
-
-    chunks = []
-    # Split on sentence boundaries
-    sentences = re.split(r"(?<=[.!?])\s+", text)
-    current = ""
-    for sentence in sentences:
-        if len(current) + len(sentence) + 1 > max_size:
-            if current:
-                chunks.append(current)
-            current = sentence
-        else:
-            current = (current + " " + sentence).strip()
-    if current:
-        chunks.append(current)
-    return chunks
-
-
-# ---------------------------------------------------------------------------
-# Main translation loop
-# ---------------------------------------------------------------------------
-
-def translate_document(
-    json_path: str,
-    source: str,
-    target: str,
-    out_path: str,
-    chunk_size: int = 4000,
-    chunk_delay: float = 0.5,
-):
     with open(json_path, encoding="utf-8") as f:
         data = json.load(f)
 
     result = deepcopy(data)
-    glossary = TermGlossary()
     sections = result.get("sections", [])
+    images = result.get("images", [])
 
-    total = len(sections)
-    skipped = 0
-    translated = 0
+    math_count = 0
+    text_count = 0
 
-    print(f"📄 Translating {total} blocks  [{source} → {target}]")
-    print("-" * 50)
-
-    for i, section in enumerate(sections):
-        btype = section.get("type")
+    for section in sections:
+        btype = section.get("type", "paragraph")
+        raw_text = section.get("text", "")
+        section["text_original"] = raw_text
 
         if btype == "math_block":
-            # Never translate math
-            skipped += 1
-            continue
+            math_count += 1
+            # math_block stays unchanged
+        else:
+            text_count += 1
 
-        original = section.get("text", "")
-        if not original.strip():
-            continue
-
-        try:
-            t = translate_text(original, source, target, chunk_size, chunk_delay)
-            t = glossary.apply(t)
-            glossary.register(original[:80], t[:80])
-            section["text_original"] = original
-            section["text"] = t
-            translated += 1
-            if (i + 1) % 10 == 0:
-                print(f"  [{i+1}/{total}] ✓ {btype}")
-        except Exception as e:
-            print(f"  [{i+1}/{total}] ⚠️  Failed: {e}")
-            section["text_original"] = original  # keep original on failure
-
-    # Translate image captions
-    for img in result.get("images", []):
+    for img in images:
         cap = img.get("caption", "")
-        if cap.strip():
-            img["caption_original"] = cap
-            img["caption"] = translate_text(cap, source, target, chunk_size, chunk_delay)
+        img["caption_original"] = cap
 
-    result["translation"] = {"source": source, "target": target}
+    result["translation"] = {
+        "source": source or data.get("metadata", {}).get("language", "en"),
+        "target": target,
+        "engine": "ai-agent"
+    }
 
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
 
-    print("-" * 50)
-    print(f"✅ Done. Translated: {translated}, Skipped (math): {skipped}")
-    print(f"📝 Output → {out_path}")
+    print("=" * 55)
+    print(f" 📋 Translation Scaffold Created → {out_path}")
+    print("=" * 55)
+    print(f"  • Total sections:        {len(sections)}")
+    print(f"  • Math blocks (locked):  {math_count} (never translated)")
+    print(f"  • Text sections to translate: {text_count}")
+    print(f"  • Image captions:        {len(images)}")
+    print(f"  • Target language:       {_lang_name(target)}")
+    print("\n💡 AI Agent can now translate text sections directly into this file!")
+    print("   LaTeX math and math_block sections are already protected.")
 
+
+def print_stats(json_path: str):
+    """Print statistics about extracted blocks."""
+    with open(json_path, encoding="utf-8") as f:
+        data = json.load(f)
+
+    sections = data.get("sections", [])
+    images = data.get("images", [])
+
+    math_count = sum(1 for s in sections if s.get("type") == "math_block")
+    text_count = len(sections) - math_count
+    total_words = sum(len(s.get("text", "").split()) for s in sections if s.get("type") != "math_block")
+
+    print(f"📄 Document Statistics for: {json_path}")
+    print(f"   Sections:   {len(sections)} ({math_count} math, {text_count} text)")
+    print(f"   Images:     {len(images)}")
+    print(f"   Word count: ~{total_words:,} words")
+
+
+def verify_translation(json_path: str):
+    """Verify that translated.json has valid translations and intact math."""
+    with open(json_path, encoding="utf-8") as f:
+        data = json.load(f)
+
+    sections = data.get("sections", [])
+    images = data.get("images", [])
+    errors = []
+
+    for i, s in enumerate(sections):
+        btype = s.get("type")
+        text = s.get("text", "")
+        if btype != "math_block" and not text.strip():
+            errors.append(f"Section {i} ({btype}) has empty translated text")
+
+        # Check inline math balance
+        single_dollars = len(re.findall(r"(?<!\$)\$(?!\$)", text))
+        if single_dollars % 2 != 0:
+            errors.append(f"Section {i} has unclosed inline math ($ delimiter count: {single_dollars})")
+
+    for i, img in enumerate(images):
+        if img.get("caption_original") and not img.get("caption"):
+            errors.append(f"Image {img.get('id', i)} is missing translated caption")
+
+    if errors:
+        print(f"⚠️ Verification warnings ({len(errors)}):")
+        for e in errors[:10]:
+            print(f"  • {e}")
+        if len(errors) > 10:
+            print(f"  ... and {len(errors) - 10} more")
+        return False
+    else:
+        target = data.get("translation", {}).get("target", "unknown")
+        print(f"✅ Translation verified! All {len(sections)} sections and {len(images)} captions validated.")
+        print(f"   Target language: {_lang_name(target)}")
+        return True
+
+
+# ---------------------------------------------------------------------------
+# Optional External Translation Engines (for standalone CLI only)
+# ---------------------------------------------------------------------------
+
+def _build_system_prompt(source: str, target: str) -> str:
+    src_name = _lang_name(source)
+    tgt_name = _lang_name(target)
+    return f"""You are an expert scientific translator specializing in AI, machine learning, and mathematics research papers.
+Translate academic text from {src_name} to {tgt_name}.
+Rules:
+1. Preserve math placeholders (__PH_0000__) exactly as-is.
+2. Preserve LaTeX math ($...$, $$...$$, \\(...\\)) verbatim.
+3. Preserve citations like [1], [Author, 2020] verbatim.
+4. Keep technical terminology accurate according to standard academic literature in {tgt_name}.
+5. Do NOT translate proper nouns (model names, dataset names, author names).
+Output ONLY the translated text."""
+
+
+def _make_gemini_translator(api_key: str, model: str = "gemini-1.5-flash") -> Callable:
+    import google.generativeai as genai
+    genai.configure(api_key=api_key)
+    gen_model = genai.GenerativeModel(model)
+
+    def translate(text: str, source: str, target: str) -> str:
+        prompt = f"{_build_system_prompt(source, target)}\n\n---\n{text}\n---"
+        response = gen_model.generate_content(prompt)
+        return response.text.strip()
+    return translate
+
+
+def _make_openai_translator(api_key: str, model: str = "gpt-4o-mini") -> Callable:
+    from openai import OpenAI
+    client = OpenAI(api_key=api_key)
+
+    def translate(text: str, source: str, target: str) -> str:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": _build_system_prompt(source, target)},
+                {"role": "user", "content": text},
+            ],
+            temperature=0.2,
+        )
+        return response.choices[0].message.content.strip()
+    return translate
+
+
+def _make_google_translator() -> Callable:
+    from deep_translator import GoogleTranslator
+    def translate(text: str, source: str, target: str) -> str:
+        translator = GoogleTranslator(source=source, target=target)
+        result = translator.translate(text)
+        return result if result else text
+    return translate
+
+
+def translate_text(text: str, source: str, target: str, translate_fn: Callable) -> str:
+    if not text.strip():
+        return text
+    protected, placeholders = _protect(text)
+    try:
+        res = translate_fn(protected, source, target)
+        return _restore(res, placeholders)
+    except Exception as e:
+        print(f"  ⚠️ Error translating chunk: {e}")
+        return text
+
+
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
 
 def main():
-    parser = argparse.ArgumentParser(description="Translate extracted PDF JSON")
-    parser.add_argument("--json", required=True, help="Path to extracted.json")
-    parser.add_argument("--source", required=True, help="Source language BCP-47 code")
-    parser.add_argument("--target", required=True, help="Target language BCP-47 code")
+    parser = argparse.ArgumentParser(
+        description="Scaffold, translate, or verify document translation",
+    )
+    parser.add_argument("--json", help="Path to extracted.json or translated.json")
+    parser.add_argument("--source", default="en", help="Source language code")
+    parser.add_argument("--target", default="vi", help="Target language code")
     parser.add_argument("--out", default="translated.json", help="Output JSON path")
-    parser.add_argument("--chunk-size", type=int, default=4000)
-    parser.add_argument("--chunk-delay", type=float, default=0.5)
+
+    # Workflow modes
+    parser.add_argument("--scaffold", action="store_true",
+                        help="Create translated.json scaffold for AI Agent to translate directly")
+    parser.add_argument("--verify", action="store_true",
+                        help="Verify translated.json for completeness and math integrity")
+    parser.add_argument("--stats", action="store_true",
+                        help="Print document section & math statistics")
+
+    # Standalone CLI translation engines (optional)
+    parser.add_argument("--engine", default="", choices=["gemini", "openai", "google"],
+                        help="External engine for standalone CLI (gemini, openai, google)")
+    parser.add_argument("--api-key", default="", help="API key for Gemini/OpenAI")
+    parser.add_argument("--model", default="", help="Model name")
+
     args = parser.parse_args()
 
-    translate_document(
-        args.json,
-        args.source,
-        args.target,
-        args.out,
-        args.chunk_size,
-        args.chunk_delay,
-    )
+    if args.stats and args.json:
+        print_stats(args.json)
+        return
+
+    if args.verify and args.json:
+        success = verify_translation(args.json)
+        sys.exit(0 if success else 1)
+
+    if args.scaffold:
+        if not args.json:
+            print("ERROR: --json extracted.json is required for --scaffold")
+            sys.exit(1)
+        scaffold_document(args.json, args.source, args.target, args.out)
+        return
+
+    # If --engine is specified (for standalone CLI execution)
+    if args.engine:
+        api_key = args.api_key or os.environ.get("GEMINI_API_KEY" if args.engine == "gemini" else "OPENAI_API_KEY", "")
+        if args.engine == "gemini":
+            if not api_key:
+                print("ERROR: GEMINI_API_KEY required for standalone --engine gemini")
+                sys.exit(1)
+            t_fn = _make_gemini_translator(api_key, args.model or "gemini-1.5-flash")
+        elif args.engine == "openai":
+            if not api_key:
+                print("ERROR: OPENAI_API_KEY required for standalone --engine openai")
+                sys.exit(1)
+            t_fn = _make_openai_translator(api_key, args.model or "gpt-4o-mini")
+        else:
+            t_fn = _make_google_translator()
+
+        with open(args.json, encoding="utf-8") as f:
+            data = json.load(f)
+        result = deepcopy(data)
+        sections = result.get("sections", [])
+        for i, s in enumerate(sections):
+            if s.get("type") == "math_block":
+                continue
+            orig = s.get("text", "")
+            s["text_original"] = orig
+            s["text"] = translate_text(orig, args.source, args.target, t_fn)
+            time.sleep(0.3)
+        result["translation"] = {"source": args.source, "target": args.target, "engine": args.engine}
+        with open(args.out, "w", encoding="utf-8") as f:
+            json.dump(result, f, ensure_ascii=False, indent=2)
+        print(f"✅ Translated via {args.engine} → {args.out}")
+        return
+
+    # Default if run without flags
+    parser.print_help()
 
 
 if __name__ == "__main__":

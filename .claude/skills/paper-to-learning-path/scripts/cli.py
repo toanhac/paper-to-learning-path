@@ -64,8 +64,34 @@ def interactive_questions(args) -> dict:
     else:
         want_sg = args.setup_guide
 
+    # Translation engine
+    engine = getattr(args, "engine", "") or ""
+    api_key = getattr(args, "api_key", "") or ""
+    model   = getattr(args, "model",   "") or ""
+
+    if not engine:
+        import os
+        print("\n🤖 Chọn phương thức dịch:")
+        print("   1) agent    — AI Agent dịch trực tiếp (Mặc định — KHÔNG cần API key)")
+        print("   2) gemini   — Tự động qua Google Gemini API")
+        print("   3) openai   — Tự động qua OpenAI API")
+        print("   4) google   — Google Translate (dự phòng legacy)")
+        choice = input("   Nhập 1/2/3/4 [1]: ").strip()
+        engine_map = {"1": "agent", "2": "gemini", "3": "openai", "4": "google",
+                      "agent": "agent", "gemini": "gemini", "openai": "openai", "google": "google"}
+        engine = engine_map.get(choice, "agent")
+
+    if engine in ("gemini", "openai") and not api_key:
+        import os
+        env_key = "GEMINI_API_KEY" if engine == "gemini" else "OPENAI_API_KEY"
+        api_key = os.environ.get(env_key, "")
+        if not api_key:
+            api_key = input(f"\n🔑 {engine.capitalize()} API Key (hoặc nhấn Enter để dùng Agent trực tiếp): ").strip()
+            if not api_key:
+                engine = "agent"
+
     # Audience
-    audience = args.audience
+    audience = getattr(args, "audience", "") or ""
     if not audience and want_lp:
         audience = input("\n🎓 Background của người đọc (để xác định cấp độ chương học)\n   Ví dụ: 'Sinh viên CNTT', 'ML engineer quen CNN'\n   Nhấn Enter để bỏ qua: ").strip()
         if not audience:
@@ -74,6 +100,7 @@ def interactive_questions(args) -> dict:
     print()
     print(f"  ✓ PDF:            {args.pdf}")
     print(f"  ✓ Target lang:    {target_lang}")
+    print(f"  ✓ Engine:         {engine}")
     print(f"  ✓ Learning path:  {'Yes' if want_lp else 'No'}")
     print(f"  ✓ Setup guide:    {'Yes' if want_sg else 'No'}")
     if audience:
@@ -85,6 +112,9 @@ def interactive_questions(args) -> dict:
         "want_lp": want_lp,
         "want_sg": want_sg,
         "audience": audience or "",
+        "engine": engine,
+        "api_key": api_key,
+        "model": model,
     }
 
 
@@ -113,6 +143,15 @@ def main():
 
     parser.add_argument("--non-interactive", action="store_true",
                         help="Skip all interactive questions; use flag defaults")
+
+    # Translation engine flags
+    parser.add_argument("--engine", default="agent", choices=["agent", "gemini", "openai", "google"],
+                        help="Translation engine: agent (default, zero API key), gemini, openai, google")
+    parser.add_argument("--api-key", default="",
+                        help="API key for Gemini or OpenAI (optional)")
+    parser.add_argument("--model", default="",
+                        help="Model override (e.g. gemini-1.5-pro, gpt-4o)")
+
     args = parser.parse_args()
 
     # Gather settings interactively or from flags
@@ -122,6 +161,9 @@ def main():
             "want_lp": args.learning_path if args.learning_path is not None else True,
             "want_sg": args.setup_guide if args.setup_guide is not None else False,
             "audience": args.audience,
+            "engine":  args.engine or "agent",
+            "api_key": args.api_key or os.environ.get("GEMINI_API_KEY", "") or os.environ.get("OPENAI_API_KEY", ""),
+            "model":   args.model or "",
         }
     else:
         settings = interactive_questions(args)
@@ -140,6 +182,9 @@ def main():
     want_lp = settings["want_lp"]
     want_sg = settings["want_sg"]
     audience = settings["audience"]
+    engine  = settings.get("engine", "agent")
+    api_key = settings.get("api_key", "")
+    model   = settings.get("model", "")
 
     print("=" * 58)
     print(f" 🏃 Running pipeline → {out_dir}/")
@@ -169,11 +214,27 @@ def main():
             source_lang = "en"
 
     # Step 4 — Translate
-    run_cmd([sys.executable, str(SKILL_SCRIPTS / "translate_content.py"),
-             "--json", str(extracted_json),
-             "--source", source_lang, "--target", target_lang,
-             "--out", str(translated_json)],
-            f"Translating ({source_lang} → {target_lang})")
+    if engine == "agent":
+        if not translated_json.exists():
+            run_cmd([sys.executable, str(SKILL_SCRIPTS / "translate_content.py"),
+                     "--scaffold",
+                     "--json", str(extracted_json),
+                     "--source", source_lang, "--target", target_lang,
+                     "--out", str(translated_json)],
+                    "Creating translation scaffold for AI Agent (No API key needed)")
+        else:
+            print("\n▶ Found existing translated.json → using it.")
+    else:
+        translate_cmd = [sys.executable, str(SKILL_SCRIPTS / "translate_content.py"),
+                         "--json", str(extracted_json),
+                         "--source", source_lang, "--target", target_lang,
+                         "--out", str(translated_json),
+                         "--engine", engine]
+        if api_key:
+            translate_cmd += ["--api-key", api_key]
+        if model:
+            translate_cmd += ["--model", model]
+        run_cmd(translate_cmd, f"Translating with {engine} ({source_lang} → {target_lang})")
 
     # Step 5 — Render paper HTML
     run_cmd([sys.executable, str(SKILL_SCRIPTS / "render_html.py"),

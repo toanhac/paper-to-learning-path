@@ -38,8 +38,9 @@ p2lp --help                      # Show full help
 
 ## Requirements
 
-Python 3.9+ must be installed separately:
+Python 3.9+ must be installed:
 
 ```bash
-pip install pymupdf deep-translator langdetect
+pip install pymupdf langdetect google-generativeai
+# Optional: pip install openai deep-translator
 ```

@@ -68,8 +68,10 @@ p2lp init --ai all           # Tất cả platform cùng lúc
 ### Thư viện Python (bắt buộc)
 
 ```bash
-pip install pymupdf deep-translator langdetect
+pip install pymupdf langdetect
 ```
+
+> **💡 Hoàn toàn KHÔNG cần API key:** Khi chạy bằng AI Agent (Claude Code, Antigravity, Cursor, Windsurf, Cline), chính Agent sẽ trực tiếp đọc bài báo, dịch thuật và viết toàn bộ lộ trình học bằng trí tuệ nhân tạo của nó — không cần tạo tài khoản hay tốn phí API bên ngoài!
 
 ### Các lệnh CLI khác
 
@@ -86,7 +88,7 @@ p2lp list                        # Liệt kê tất cả platform được hỗ 
 ```bash
 git clone https://github.com/ToanHac/paper-to-learning-path.git
 cd paper-to-learning-path
-pip install pymupdf deep-translator langdetect
+pip install pymupdf langdetect
 python scripts/install.py --all
 ```
 
@@ -259,19 +261,22 @@ Sau đó gõ:
 Chạy toàn bộ pipeline trực tiếp từ terminal:
 
 ```bash
-# Interactive mode — hỏi bạn các tùy chọn trước khi chạy
+# Interactive mode — hỏi bạn các tùy chọn tính năng và AI engine trước khi chạy
 python .agents/skills/paper-to-learning-path/scripts/cli.py --pdf paper.pdf
 
-# Full pipeline (bài báo + lộ trình học + setup guide)
+# Full pipeline với Gemini AI (API key miễn phí tại Google AI Studio)
 python .agents/skills/paper-to-learning-path/scripts/cli.py \
     --pdf paper.pdf \
     --target vi \
+    --engine gemini \
+    --api-key "$GEMINI_API_KEY" \
     --learning-path \
     --setup-guide
 
 # Chỉ dịch bài báo, không tạo lộ trình học
 python .agents/skills/paper-to-learning-path/scripts/cli.py \
     --pdf paper.pdf --target fr \
+    --engine gemini \
     --no-learning-path --no-setup-guide
 ```
 
@@ -317,7 +322,7 @@ và chạy demo thử.
     [Bước 3]  detect_lang.py     ──► Tự nhận diện ngôn ngữ gốc
                                 │
                                 ▼
-    [Bước 4]  translate_content  ──► Dịch thuật (LaTeX placeholders bảo vệ)
+    [Bước 4]  translate_content  ──► Dịch bằng AI (Gemini/OpenAI; bảo vệ LaTeX)
                                 │
                  ┌──────────────┴──────────────┐
                  ▼                             ▼

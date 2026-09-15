@@ -54,10 +54,10 @@ Then proceed with the pipeline below, running only the steps relevant to the use
 
 ## Prerequisites Check
 
-Ensure the following Python packages are installed:
+Ensure the required Python packages are installed:
 
 ```bash
-pip install pymupdf deep-translator langdetect
+pip install pymupdf langdetect
 ```
 
 Run the check script first:
@@ -66,7 +66,7 @@ Run the check script first:
 python scripts/check_deps.py
 ```
 
-If anything is missing, install it and stop. Do not proceed until all deps pass.
+If anything is missing, ask the user to install it. Do not proceed until all deps pass.
 
 ---
 
@@ -123,21 +123,34 @@ Note the `LANG_CODE=` line from the output. If confidence < 85%, confirm with th
 
 ---
 
-## Step 4 — Translate Content
+## Step 4 — Translate Content (Agent Direct Translation — Zero API Keys Needed)
 
-```bash
-python scripts/translate_content.py \
-  --json "<output_dir>/extracted.json" \
-  --source "<source_lang>" \
-  --target "<target_lang>" \
-  --out "<output_dir>/translated.json"
-```
+Because you are an advanced AI agent, **you perform the translation directly using your own intelligence** — no external API keys (Gemini, OpenAI) or third-party translation subscriptions are needed!
 
-**Critical rules:**
-- `math_block` sections: copied verbatim, never translated
-- Inline math (`$…$`): protected by placeholder before translation, restored after
-- Citations (`[1]`, `[Author, 2020]`): protected and restored unchanged
-- Technical terms: registered in a glossary for consistency across the document
+1. **Scaffold the translation file:**
+   ```bash
+   python scripts/translate_content.py \
+     --scaffold \
+     --json "<output_dir>/extracted.json" \
+     --source "<source_lang>" \
+     --target "<target_lang>" \
+     --out "<output_dir>/translated.json"
+   ```
+   This copies the structure, records `text_original`, and locks all `math_block` sections so equations remain 100% untouched.
+
+2. **Translate the text sections:**
+   Inspect and update `<output_dir>/translated.json`:
+   - For every text section (`title`, `heading`, `paragraph`, `abstract`): translate `text` into `<target_lang>` with high academic quality.
+   - **Math blocks (`type == "math_block"`):** NEVER translate — keep verbatim.
+   - **Inline LaTeX math (`$...$`, `\(...\)`, `$$...$$`):** Keep strictly verbatim.
+   - **Citations (`[1]`, `[Author, 2020]`):** Keep strictly verbatim.
+   - **Domain nomenclature:** Keep standard model names (*NeRF*, *3DGS*, *Transformer*, *AdamW*) and dataset names (*ImageNet*, *COCO*, *ScanNet*) intact.
+   - **Image captions:** Translate the `caption` field in `images`.
+
+3. **Verify translation integrity:**
+   ```bash
+   python scripts/translate_content.py --verify "<output_dir>/translated.json"
+   ```
 
 ---
 

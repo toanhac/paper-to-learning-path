@@ -68,8 +68,10 @@ p2lp init --ai all           # All platforms at once
 ### Python dependencies (required)
 
 ```bash
-pip install pymupdf deep-translator langdetect
+pip install pymupdf langdetect
 ```
+
+> **💡 Zero API Keys Needed:** When used with an AI Agent (Claude Code, Antigravity, Cursor, Windsurf, Cline), the Agent performs the translation and content generation directly using its own intelligence — no external API keys or subscriptions required!
 
 ### Other CLI commands
 
@@ -86,7 +88,7 @@ p2lp list                        # List all supported platforms
 ```bash
 git clone https://github.com/ToanHac/paper-to-learning-path.git
 cd paper-to-learning-path
-pip install pymupdf deep-translator langdetect
+pip install pymupdf langdetect
 python scripts/install.py --all
 ```
 
@@ -262,19 +264,22 @@ Then prompt:
 Run the full pipeline directly from your terminal:
 
 ```bash
-# Interactive mode — asks which features to enable
+# Interactive mode — asks which features and AI engine to use
 python .agents/skills/paper-to-learning-path/scripts/cli.py --pdf paper.pdf
 
-# Full pipeline (paper + learning path + setup guide)
+# Full pipeline with Gemini AI translation (free API key from Google AI Studio)
 python .agents/skills/paper-to-learning-path/scripts/cli.py \
     --pdf paper.pdf \
     --target vi \
+    --engine gemini \
+    --api-key "$GEMINI_API_KEY" \
     --learning-path \
     --setup-guide
 
 # Paper translation only
 python .agents/skills/paper-to-learning-path/scripts/cli.py \
     --pdf paper.pdf --target fr \
+    --engine gemini \
     --no-learning-path --no-setup-guide
 ```
 
@@ -320,7 +325,7 @@ the environment, and run the demo.
     [Step 3] detect_lang.py      ──► Auto-detect source language
                                 │
                                 ▼
-    [Step 4] translate_content   ──► Translate (LaTeX placeholders protected)
+    [Step 4] translate_content   ──► AI Translate (Gemini/OpenAI; LaTeX protected)
                                 │
                  ┌──────────────┴──────────────┐
                  ▼                             ▼

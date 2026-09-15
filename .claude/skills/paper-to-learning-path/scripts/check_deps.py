@@ -1,35 +1,35 @@
 #!/usr/bin/env python3
 """
 check_deps.py — Verify that all required Python packages are installed.
-Exits with code 0 if all dependencies are present, 1 otherwise.
+Exits with code 0 if all core dependencies are present, 1 otherwise.
 """
 import importlib
 import sys
 
+# Core dependencies required for PDF extraction and processing
 REQUIRED = {
-    "fitz": "pymupdf",
-    "deep_translator": "deep-translator",
+    "fitz":       "pymupdf",
     "langdetect": "langdetect",
 }
 
-OPTIONAL = {
-    "openai": "openai (optional — for GPT-4 translation engine)",
-    "anthropic": "anthropic (optional — for Claude translation engine)",
-    "deepl": "deepl (optional — for DeepL translation engine)",
+# Optional packages only needed if using standalone CLI without an AI agent
+OPTIONAL_CLI = {
+    "google.generativeai": ("google-generativeai", "Gemini (standalone CLI only)"),
+    "openai":              ("openai",               "OpenAI (standalone CLI only)"),
+    "deep_translator":     ("deep-translator",      "Google Translate (legacy fallback)"),
 }
 
-print("─" * 50)
-print(" Dependency Check — paper-to-learning-path v2")
-print("─" * 50)
+print("─" * 55)
+print(" Dependency Check — paper-to-learning-path")
+print("─" * 55)
 
-missing = []
-print("\n[Required]")
+missing_required = []
+print("\n[Required — Core Pipeline]")
 for module, package in REQUIRED.items():
     if importlib.util.find_spec(module) is None:
-        missing.append(package)
+        missing_required.append(package)
         print(f"  ✗  MISSING  {package}")
     else:
-        # Show installed version if available
         try:
             mod = importlib.import_module(module)
             ver = getattr(mod, "__version__", "?")
@@ -37,17 +37,21 @@ for module, package in REQUIRED.items():
             ver = "?"
         print(f"  ✓  OK       {package}  ({ver})")
 
-print("\n[Optional — for premium translation engines]")
-for module, package in OPTIONAL.items():
-    status = "✓" if importlib.util.find_spec(module) else "·"
-    print(f"  {status}  {package}")
+print("\n[Optional — Standalone CLI without Agent]")
+for module, (package, label) in OPTIONAL_CLI.items():
+    status = "✓" if importlib.util.find_spec(module.split(".")[0]) is not None else "·"
+    print(f"  {status}  {package:22s}  — {label}")
 
 print()
-if missing:
-    print(f"❌  {len(missing)} required package(s) missing.\n")
+
+if missing_required:
+    print(f"❌  {len(missing_required)} required package(s) missing.\n")
     print("    Install with:")
-    print(f"    pip install {' '.join(missing)}\n")
+    print("    pip install " + " ".join(missing_required))
+    print()
     sys.exit(1)
 
-print("✅  All required dependencies are installed.\n")
+print("✅  Core dependencies ready.")
+print("💡  When running via an AI Agent (Claude, Antigravity, Cursor, Windsurf),")
+print("    translation is performed directly by the agent — NO API keys required!\n")
 sys.exit(0)
