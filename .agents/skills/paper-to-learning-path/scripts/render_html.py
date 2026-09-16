@@ -5,7 +5,7 @@ render_html.py — Render translated JSON into a self-contained nature-inspired 
 Usage:
     python render_html.py \\
         --json translated.json \\
-        --template ../resources/nature_template.html \\
+        --template ../resources/nature_paper.html \\
         --out paper_translated.html \\
         [--offline]
 
@@ -34,27 +34,24 @@ def _esc(text: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Math rendering — wrap for KaTeX auto-render
+# Math-safe HTML escaping
+# Protects LaTeX delimiters before HTML-escaping so KaTeX can still parse them.
 # ---------------------------------------------------------------------------
 
-def _render_math(text: str) -> str:
-    """
-    Convert LaTeX delimiters to KaTeX-compatible ones.
-    KaTeX auto-render handles $...$ (inline) and $$...$$ (display) natively.
-    """
-    return text  # KaTeX auto-render will process as-is
-
-
 def _escape_and_math(text: str) -> str:
-    """Escape HTML but preserve math delimiters for KaTeX."""
-    # Protect math regions
-    math_blocks = []
+    """Escape HTML but keep math delimiters intact for KaTeX auto-render."""
+    math_blocks: list[str] = []
+
+    # Match all LaTeX math regions (display and inline)
     placeholder_re = re.compile(
-        r"(\$\$[\s\S]+?\$\$|\$[^$\n]{1,300}\$|\\\[[\s\S]+?\\\]|\\\([\s\S]+?\\\))",
+        r"(\$\$[\s\S]+?\$\$"           # $$ ... $$ display
+        r"|\$[^$\n]{1,500}\$"          # $ ... $ inline
+        r"|\\\[[\s\S]+?\\\]"           # \[ ... \]
+        r"|\\\([\s\S]+?\\\))",         # \( ... \)
         re.DOTALL,
     )
 
-    def stash(m):
+    def stash(m: re.Match) -> str:
         idx = len(math_blocks)
         math_blocks.append(m.group(0))
         return f"\x00MATH{idx}\x00"
@@ -62,7 +59,7 @@ def _escape_and_math(text: str) -> str:
     protected = placeholder_re.sub(stash, text)
     escaped = _esc(protected)
 
-    # Restore math
+    # Restore math regions verbatim (must NOT be HTML-escaped)
     for i, block in enumerate(math_blocks):
         escaped = escaped.replace(f"\x00MATH{i}\x00", block)
 
@@ -82,10 +79,13 @@ def _section_to_html(section: dict, heading_counters: list) -> str:
         return ""
 
     if btype == "heading":
-        # Determine heading level based on counters
         level = 2
-        anchor = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
-        orig_tag = f'<span class="original-lang" title="Original">{_esc(original)}</span>' if original else ""
+        # Build a slug-safe anchor from the translated heading text
+        anchor = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")[:80]
+        orig_tag = (
+            f'<span class="original-lang" title="Original">{_esc(original)}</span>'
+            if original else ""
+        )
         return (
             f'<h{level} id="{anchor}" class="section-heading">'
             f'{_escape_and_math(text)}{orig_tag}'
@@ -93,7 +93,19 @@ def _section_to_html(section: dict, heading_counters: list) -> str:
         )
 
     elif btype == "math_block":
-        return f'<div class="math-block">$${text}$$</div>\n'
+        # math_block raw text may already contain $$...$$ or \[...\]
+        # Strip wrapping delimiters if present, then emit clean display math
+        raw = text.strip()
+        # Remove outer $$ ... $$ wrapping if already present
+        if raw.startswith("$$") and raw.endswith("$$") and len(raw) > 4:
+            inner = raw[2:-2].strip()
+        # Remove outer \[ ... \] wrapping if already present
+        elif raw.startswith(r"\[") and raw.endswith(r"\]") and len(raw) > 4:
+            inner = raw[2:-2].strip()
+        else:
+            inner = raw
+        # Emit as display math inside a styled block
+        return f'<div class="math-block">\\[{inner}\\]</div>\n'
 
     elif btype == "caption":
         return f'<figcaption class="figure-caption">{_escape_and_math(text)}</figcaption>\n'
@@ -102,6 +114,14 @@ def _section_to_html(section: dict, heading_counters: list) -> str:
         items = [li.strip() for li in re.split(r"\n+", text) if li.strip()]
         items_html = "\n".join(f"  <li>{_escape_and_math(item)}</li>" for item in items)
         return f'<ul class="paper-list">\n{items_html}\n</ul>\n'
+
+    elif btype == "abstract":
+        return (
+            f'<div class="abstract-box">'
+            f'<div class="abstract-label">Abstract</div>'
+            f'<p>{_escape_and_math(text)}</p>'
+            f'</div>\n'
+        )
 
     else:  # paragraph
         return f'<p class="paper-paragraph">{_escape_and_math(text)}</p>\n'
@@ -121,36 +141,15 @@ def _image_to_html(img: dict) -> str:
     elif path:
         data_uri = path  # fallback: use path as src
 
-    cap_html = f"<figcaption>{_escape_and_math(caption)}</figcaption>" if caption else ""
+    if not data_uri:
+        return ""  # skip images with no valid source
+
+    cap_html = f"<figcaption class=\"figure-caption\">{_escape_and_math(caption)}</figcaption>" if caption else ""
     return (
         f'<figure class="paper-figure" id="{img_id}">\n'
         f'  <img src="{data_uri}" alt="{_esc(caption)}" loading="lazy"/>\n'
         f'  {cap_html}\n'
         f'</figure>\n'
-    )
-
-
-# ---------------------------------------------------------------------------
-# Table of contents builder
-# ---------------------------------------------------------------------------
-
-def _build_toc(sections: list) -> str:
-    headings = [s for s in sections if s.get("type") == "heading"]
-    if not headings:
-        return ""
-
-    items = []
-    for h in headings:
-        text = h.get("text", "")
-        anchor = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
-        items.append(f'  <li><a href="#{anchor}">{_esc(text)}</a></li>')
-
-    return (
-        '<nav class="toc" aria-label="Table of Contents">\n'
-        '  <div class="toc-title">Contents</div>\n'
-        '  <ul>\n'
-        + "\n".join(items)
-        + "\n  </ul>\n</nav>\n"
     )
 
 
@@ -201,7 +200,6 @@ def render(json_path: str, template_path: str, out_path: str, offline: bool = Fa
             content_parts.append(_image_to_html(img))
 
     content_html = "\n".join(content_parts)
-    toc_html = _build_toc(sections)
 
     # Read template
     if os.path.isfile(template_path):
@@ -219,7 +217,6 @@ def render(json_path: str, template_path: str, out_path: str, offline: bool = Fa
         .replace("{{SOURCE_LANG}}", _esc(src_lang))
         .replace("{{TARGET_LANG}}", _esc(tgt_lang))
         .replace("{{PAGES}}", str(meta.get("pages", "")))
-        .replace("{{TOC}}", toc_html)
         .replace("{{CONTENT}}", content_html)
         .replace("{{SOURCE_FILE}}", _esc(meta.get("source_file", "")))
     )
@@ -248,11 +245,14 @@ def _fallback_template() -> str:
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
-  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\\\[',right:'\\\\]',display:true},{left:'$',right:'$',display:false},{left:'\\\\(',right:'\\\\)',display:false}],throwOnError:false});"></script>
+<style>body{font-family:Georgia,serif;max-width:860px;margin:0 auto;padding:2rem;line-height:1.8}
+.math-block{background:#f5f5f5;padding:1rem;margin:1rem 0;border-radius:6px;overflow-x:auto;text-align:center}
+</style>
 </head><body>
 <p><a href="learning/index.html">📚 View Learning Path</a></p>
 <h1>{{TITLE}}</h1><p>{{AUTHORS}}</p><p>{{SOURCE_LANG}} → {{TARGET_LANG}}</p>
-{{TOC}}{{CONTENT}}
+{{CONTENT}}
 <p>Source: {{SOURCE_FILE}} | Pages: {{PAGES}}</p>
 </body></html>"""
 
@@ -260,9 +260,11 @@ def _fallback_template() -> str:
 def main():
     parser = argparse.ArgumentParser(description="Render translated JSON to HTML")
     parser.add_argument("--json", required=True)
-    parser.add_argument("--template",
-                        default=str(Path(__file__).parent.parent / "resources" / "nature_paper.html"),
-                        help="Path to HTML template (default: resources/nature_paper.html)")
+    parser.add_argument(
+        "--template",
+        default=str(Path(__file__).parent.parent / "resources" / "nature_paper.html"),
+        help="Path to HTML template (default: resources/nature_paper.html)",
+    )
     parser.add_argument("--out", required=True)
     parser.add_argument("--offline", action="store_true")
     args = parser.parse_args()
